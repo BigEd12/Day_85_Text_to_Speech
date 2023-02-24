@@ -1,15 +1,6 @@
-from boto3 import Session
-from botocore.exceptions import BotoCoreError, ClientError
-from contextlib import closing
-import os
 import sys
-import subprocess
-from tempfile import gettempdir
-from typing import Union
-from PyPDF2 import PdfFileReader
 from audio import Polly
 from pdf import Reader
-
 
 if __name__ == "__main__":
     polly = Polly()
@@ -23,9 +14,12 @@ if __name__ == "__main__":
 
     if pdf_or_text == "1":
         text_to_use = input("Please type the text you would like converted to speech: ")
-    elif pdf_or_text == "2":
 
-        text_to_use = reader.reader()
+    elif pdf_or_text == "2":
+        pdf_name = input("Please ensure the PDF is already saved in the script directory.\n"
+              "What is the name of the pdf, without the extension (eg. 'story'): ")
+        text_to_use = reader.reader(pdf_name=pdf_name)
+
     else:
         print("Invalid choice")
         sys.exit(-1)
@@ -34,25 +28,11 @@ if __name__ == "__main__":
 
     stream_or_write = input("Do you want to stream the audio (1), or save it to file (2): ")
     if stream_or_write == "1":
-        output = os.path.join(gettempdir(), "speech.mp3")
-
-        try:
-            with open(output, "wb") as file:
-                file.write(audio_data)
-        except IOError as error:
-            print(error)
-            sys.exit(-1)
-
-        if sys.platform == "win32":
-            os.startfile(output)
-        else:
-            opener = "open" if sys.platform == "darwin" else "xdg-open"
-            subprocess.call([opener, output])
+        polly.stream_audio(audio_data=audio_data)
 
     elif stream_or_write == "2":
         save_name = input("Enter the name you want to give the saved file: ")
-        with open(f'{save_name}.mp3', 'wb') as file:
-            file.write(audio_data)
+        polly.save_audio(audio_data=audio_data, save_name=save_name)
     else:
         print("Invalid choice")
         sys.exit(-1)

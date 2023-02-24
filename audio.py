@@ -2,6 +2,9 @@ from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 import sys
+import os
+import subprocess
+from tempfile import gettempdir
 
 class Polly:
     def __init__(self, profile_name: str = "default"):
@@ -23,3 +26,25 @@ class Polly:
         else:
             print("Could not stream audio")
             sys.exit(-1)
+
+
+    def save_audio(self, audio_data, save_name: str):
+        with open(f'{save_name}.mp3', 'wb') as file:
+            file.write(audio_data)
+
+
+    def stream_audio(self, audio_data):
+        output = os.path.join(gettempdir(), "speech.mp3")
+
+        try:
+            with open(output, "wb") as file:
+                file.write(audio_data)
+        except IOError as error:
+            print(error)
+            sys.exit(-1)
+
+        if sys.platform == "win32":
+            os.startfile(output)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, output])
