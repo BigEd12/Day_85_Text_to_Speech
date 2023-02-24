@@ -1,5 +1,9 @@
 from PyPDF2 import PdfReader
 
-reader = PdfReader("story.pdf")
-page = reader.pages[0]
-story_text = page.extract_text()
+class Reader:
+    def reader(self):
+        reader = PdfReader("story.pdf")
+        page = reader.pages[0]
+        text_to_use = page.extract_text()
+        return text_to_use
+
